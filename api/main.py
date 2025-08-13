@@ -6,7 +6,20 @@ from PIL import Image
 import tensorflow as tf
 import requests as request
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+# CORS setup
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Sab origins allow (production me specific domain do)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 MODEL =tf.keras.models.load_model(r'E:\AI Projects\Apple-Plant-Disease-Prediction-Project\saved_model\1\Apple_Plant_Disease_Prediction_model.h5')
 CLASS_NAMES = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy']
