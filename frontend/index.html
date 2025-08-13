@@ -1,0 +1,108 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🍏 Apple Disease Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+        }
+        .drop-area {
+            border: 3px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 50px auto;
+            width: 300px;
+            background: white;
+            cursor: pointer;
+        }
+        .drop-area.highlight {
+            background: #e8f5e9;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 15px;
+        }
+        .result {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>🍏 Apple Plant Disease Detector</header>
+
+<div class="drop-area" id="drop-area">
+    <p>Drag & Drop image here or click to upload</p>
+    <input type="file" id="fileElem" accept="image/*" style="display:none">
+</div>
+
+<div class="result" id="result"></div>
+
+<script>
+    const dropArea = document.getElementById("drop-area");
+    const fileInput = document.getElementById("fileElem");
+    const resultDiv = document.getElementById("result");
+
+    dropArea.addEventListener("click", () => fileInput.click());
+
+    ["dragenter", "dragover"].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.add("highlight");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.remove("highlight");
+        });
+    });
+
+    dropArea.addEventListener("drop", (e) => {
+        let files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    fileInput.addEventListener("change", () => {
+        handleFiles(fileInput.files);
+    });
+
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("http://localhost:8000/predict", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            resultDiv.innerHTML = `<b>Class:</b> ${data.class} <br> <b>Confidence:</b> ${data.confidence.toFixed(2)}%`;
+        })
+        .catch(err => {
+            console.error(err);
+            resultDiv.innerHTML = "❌ Error: Could not connect to server.";
+        });
+    }
+</script>
+
+</body>
+</html>
